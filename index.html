@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,100 +9,191 @@
 
 <body>
 
-<div class="contenedor">
+<!-- ===== INTRO CINEMATOGRÁFICA ===== -->
+<div id="intro">
+<h1 class="introTexto">Para alguien muy especial…</h1>
+</div>
 
-<h1>Feliz San Valentín Mi Polola 💜</h1>
+<h1 id="titulo">Feliz San Valentín Polola 💘</h1>
 
 <button id="botonSorpresa">Pícame</button>
 
-</div>
+<audio id="musica" src="Chocolate.mp3" loop></audio>
 
-<audio id="musica" src="Chocolate.mp3"></audio>
+<!-- CARTA -->
+<div id="pantallaCarta" class="cartaBody oculto">
+
+<div class="carta">
+
+<h2>💜 Para mi persona favorita 💜</h2>
+
+<p>
+Dos, dos meses ya woow 🐮❤️ me encanta cómo el tiempo corre cuando estamos juntos ⌛
+y aun así siento que nunca es suficiente. Si pudiera, repetiría esos ratos contigo
+una y otra vez 🔁, tanto que me atrevería a decirte que estos dos meses entran dentro
+de los mejores días en mi vida.
+
+Muak, me gustas ❤️, me gusta tu forma de ser. Eres calma mientras voy por el mundo
+siendo un ser tan desesperado 😾, pero hey mágicamente tú 🫵 logras sacarme una
+sonrisa 🧛😝
+
+No sé cómo explicarlo mejor, pero quererte se siente natural, ligero, bonito ✨
+y si este es solo el comienzo, no puedo esperar a todo lo que viene 🫂
+
+<br><br>
+
+<b>Te amuuu mi Diosa 🌷</b>
+</p>
+
+<button id="volver" class="volver">
+ Volver al universo 
+</button>
+
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-// ESCENA
-const scene = new THREE.Scene();
+// ===== INTRO =====
+setTimeout(()=>{
+document.getElementById("intro").classList.add("introFade");
+}, 2500);
 
-const camera = new THREE.PerspectiveCamera(
-75,
-window.innerWidth/window.innerHeight,
-0.1,
-1000
-);
+setTimeout(()=>{
+document.getElementById("intro").style.display="none";
+}, 3500);
 
-camera.position.z = 120;
+// ===== AUDIO =====
+const musica = document.getElementById("musica");
+const ctx = new (window.AudioContext || window.webkitAudioContext)();
+const src = ctx.createMediaElementSource(musica);
+const analyser = ctx.createAnalyser();
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
+src.connect(analyser);
+analyser.connect(ctx.destination);
 
-renderer.domElement.style.position = "fixed";
-renderer.domElement.style.top = "0";
-renderer.domElement.style.left = "0";
-renderer.domElement.style.zIndex = "0";
+const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-document.body.appendChild(renderer.domElement);
-
-// GALAXIA
-const starGeometry = new THREE.BufferGeometry();
-const starCount = 5000;
-const positions = [];
-
-for(let i=0;i<starCount;i++){
-positions.push(
-(Math.random()-0.5)*600,
-(Math.random()-0.5)*300,
-(Math.random()-0.5)*600
-);
+function fadeInAudio(){
+musica.volume=0;
+musica.play().catch(()=>{});
+let v=0;
+let fade=setInterval(()=>{
+v+=0.05;
+musica.volume=Math.min(v,1);
+if(v>=1) clearInterval(fade);
+},100);
 }
 
-starGeometry.setAttribute(
-"position",
-new THREE.Float32BufferAttribute(positions,3)
-);
+// ===== BOTONES =====
+const boton=document.getElementById("botonSorpresa");
+const carta=document.getElementById("pantallaCarta");
 
-const starMaterial = new THREE.PointsMaterial({
-color:0x8b5cf6,
-size:1
-});
-
-const stars = new THREE.Points(starGeometry,starMaterial);
-scene.add(stars);
-
-// BOTÓN → música + carta
-document.getElementById("botonSorpresa").onclick = () => {
-
-const musica = document.getElementById("musica");
-
-musica.play().then(() => {
-setTimeout(() => {
-window.location.href = "carta.html";
-}, 400);
-}).catch(() => {
-window.location.href = "carta.html";
-});
-
+boton.onclick=()=>{
+ctx.resume();
+fadeInAudio();
+carta.classList.remove("oculto");
+carta.classList.add("fadeIn");
 };
 
-// ANIMACIÓN
+document.getElementById("volver").onclick=()=>{
+carta.classList.add("fadeOut");
+setTimeout(()=>{
+carta.classList.add("oculto");
+carta.classList.remove("fadeOut");
+},600);
+};
+
+// ===== ESCENA =====
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+camera.position.z=120;
+
+// ===== ILUMINACIÓN DINÁMICA =====
+
+// luz ambiental suave
+const ambientLight = new THREE.AmbientLight(0x404060, 1.2);
+scene.add(ambientLight);
+
+// luz puntual que reacciona a la música
+const pulseLight = new THREE.PointLight(0xa78bfa, 2, 500);
+pulseLight.position.set(0, 0, 80);
+scene.add(pulseLight);
+
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.domElement.style.position="fixed";
+renderer.domElement.style.zIndex="0";
+document.body.appendChild(renderer.domElement);
+
+// ===== ESTRELLAS =====
+const starGeo=new THREE.BufferGeometry();
+let pos=[];
+
+for(let i=0;i<4000;i++){
+pos.push((Math.random()-0.5)*600,(Math.random()-0.5)*300,(Math.random()-0.5)*600);
+}
+
+starGeo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+
+const stars=new THREE.Points(
+starGeo,
+new THREE.PointsMaterial({color:0x8b5cf6,size:1})
+);
+
+scene.add(stars);
+
+// ===== PARTÍCULAS REACTIVAS =====
+const reactGeo=new THREE.BufferGeometry();
+let rpos=[];
+
+for(let i=0;i<800;i++){
+rpos.push((Math.random()-0.5)*400,(Math.random()-0.5)*200,(Math.random()-0.5)*400);
+}
+
+reactGeo.setAttribute("position",new THREE.Float32BufferAttribute(rpos,3));
+
+const react=new THREE.Points(
+reactGeo,
+new THREE.PointsMaterial({color:0xffffff,size:1})
+);
+
+scene.add(react);
+
+// ===== ANIMACIÓN =====
+let time=0;
+
 function animate(){
 requestAnimationFrame(animate);
-stars.rotation.y += 0.001;
+
+analyser.getByteFrequencyData(dataArray);
+let avg=dataArray.reduce((a,b)=>a+b)/dataArray.length;
+
+react.material.size=1+avg/80;
+
+stars.rotation.y+=0.001;
+camera.position.x=Math.sin(time)*10;
+camera.lookAt(0,0,0);
+
+time+=0.003;
+
 renderer.render(scene,camera);
 }
 
 animate();
 
-// RESPONSIVE
 window.addEventListener("resize",()=>{
-camera.aspect=window.innerWidth/window.innerHeight;
+camera.aspect=innerWidth/innerHeight;
 camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setSize(innerWidth,innerHeight);
 });
 
 </script>
 
 </body>
 </html>
+
+
