@@ -8,20 +8,19 @@
 
 <body>
 
-<h1>💙 Feliz San Valentín Mi Polola 💜</h1>
+<div class="contenedor">
+
+<h1>Feliz San Valentín Mi Polola 💜</h1>
 
 <button id="botonSorpresa">Pícame</button>
 
-<audio id="musica" src="Chocolate.mp3" loop autoplay></audio>
+</div>
+
+<audio id="musica" src="Chocolate.mp3"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
-
-// Reproducir música cuando toque la pantalla
-document.body.addEventListener("click", () => {
-document.getElementById("musica").play().catch(()=>{});
-}, { once: true });
 
 // ESCENA
 const scene = new THREE.Scene();
@@ -71,9 +70,19 @@ size:1
 const stars = new THREE.Points(starGeometry,starMaterial);
 scene.add(stars);
 
-// BOTÓN abre carta
+// BOTÓN → música + carta
 document.getElementById("botonSorpresa").onclick = () => {
+
+const musica = document.getElementById("musica");
+
+musica.play().then(() => {
+setTimeout(() => {
 window.location.href = "carta.html";
+}, 400);
+}).catch(() => {
+window.location.href = "carta.html";
+});
+
 };
 
 // ANIMACIÓN
