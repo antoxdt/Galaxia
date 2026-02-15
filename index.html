@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Feliz San Valentín</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>💙 Feliz San Valentín Mi Polola 💜</h1>
+
+<button id="botonSorpresa">Pícame</button>
+
+<audio id="musica" src="Chocolate.mp3" loop autoplay></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+// Reproducir música cuando toque la pantalla
+document.body.addEventListener("click", () => {
+document.getElementById("musica").play().catch(()=>{});
+}, { once: true });
+
+// ESCENA
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+75,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
+
+camera.position.z = 120;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+renderer.domElement.style.position = "fixed";
+renderer.domElement.style.top = "0";
+renderer.domElement.style.left = "0";
+renderer.domElement.style.zIndex = "0";
+
+document.body.appendChild(renderer.domElement);
+
+// GALAXIA
+const starGeometry = new THREE.BufferGeometry();
+const starCount = 5000;
+const positions = [];
+
+for(let i=0;i<starCount;i++){
+positions.push(
+(Math.random()-0.5)*600,
+(Math.random()-0.5)*300,
+(Math.random()-0.5)*600
+);
+}
+
+starGeometry.setAttribute(
+"position",
+new THREE.Float32BufferAttribute(positions,3)
+);
+
+const starMaterial = new THREE.PointsMaterial({
+color:0x8b5cf6,
+size:1
+});
+
+const stars = new THREE.Points(starGeometry,starMaterial);
+scene.add(stars);
+
+// BOTÓN abre carta
+document.getElementById("botonSorpresa").onclick = () => {
+window.location.href = "carta.html";
+};
+
+// ANIMACIÓN
+function animate(){
+requestAnimationFrame(animate);
+stars.rotation.y += 0.001;
+renderer.render(scene,camera);
+}
+
+animate();
+
+// RESPONSIVE
+window.addEventListener("resize",()=>{
+camera.aspect=window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+</script>
+
+</body>
+</html>
